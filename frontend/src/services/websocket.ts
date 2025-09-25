@@ -86,7 +86,7 @@ export class WebSocketService {
 export class LocationTrackingService extends WebSocketService {
   constructor(truckId: number) {
     const token = localStorage.getItem('access_token');
-    const wsUrl = `ws://localhost:8000/ws/tracking/${truckId}/?token=${token}`;
+    const wsUrl = `wss://truck-management-api-pr81.onrender.com/ws/tracking/${truckId}/?token=${token}`;
     super(wsUrl);
   }
 
