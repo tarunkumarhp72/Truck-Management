@@ -107,7 +107,7 @@ export class LocationTrackingService extends WebSocketService {
 export class AdminDashboardService extends WebSocketService {
   constructor() {
     const token = localStorage.getItem('access_token');
-    const wsUrl = `ws://localhost:8000/ws/admin/dashboard/?token=${token}`;
+    const wsUrl = `wss://truck-management-api-pr81.onrender.com/ws/admin/dashboard/?token=${token}`;
     super(wsUrl);
   }
 }
