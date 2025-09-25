@@ -147,7 +147,7 @@ const Map: React.FC<MapProps> = ({
         mapInstanceRef.current.invalidateSize();
       }
     }, 100);
-  }, [locations, showRoute, onLocationClick]);
+  }, [locations, showRoute, onLocationClick, center, zoom]);
 
   // Add resize effect when component mounts
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Map from '../components/Map';
 import { Truck, Location,  User, DashboardData } from '../types';
@@ -6,7 +6,7 @@ import { truckAPI, locationAPI,  authAPI, dashboardAPI } from '../services/api';
 import { AdminDashboardService } from '../services/websocket';
 
 const AdminDashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [selectedTruck, setSelectedTruck] = useState<Truck | null>(null);
   const [selectedTruckLocations, setSelectedTruckLocations] = useState<Location[]>([]);
@@ -21,6 +21,12 @@ const AdminDashboard: React.FC = () => {
     model: '',
     driver: '',
   });
+
+  // Refs to avoid stale closures in WebSocket callbacks
+  // (initialized after callbacks are declared below)
+  const loadDashboardDataRef = useRef<() => Promise<void>>();
+  const loadTruckLocationsRef = useRef<(truck: Truck) => Promise<void>>();
+  const selectedTruckRef = useRef<Truck | null>(null);
 
   // Load dashboard data
   const loadDashboardData = useCallback(async () => {
@@ -55,6 +61,11 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
+  // Keep refs updated with latest functions/state
+  useEffect(() => { loadDashboardDataRef.current = loadDashboardData; }, [loadDashboardData]);
+  useEffect(() => { loadTruckLocationsRef.current = loadTruckLocations; }, [loadTruckLocations]);
+  useEffect(() => { selectedTruckRef.current = selectedTruck; }, [selectedTruck]);
+
   // Create new truck
   const createTruck = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,21 +99,25 @@ const AdminDashboard: React.FC = () => {
 
   // Initialize WebSocket connection (optional)
   useEffect(() => {
+    let localService: AdminDashboardService | null = null;
+
     const initWebSocket = async () => {
       try {
         const service = new AdminDashboardService();
         await service.connect();
-        
+        localService = service;
+
         service.onMessage((data) => {
           if (data.type === 'location_update') {
-            // Update real-time location data
-            loadDashboardData();
-            if (selectedTruck) {
-              loadTruckLocations(selectedTruck);
+            // Update real-time location data without capturing stale variables
+            loadDashboardDataRef.current?.();
+            const currentTruck = selectedTruckRef.current;
+            if (currentTruck) {
+              loadTruckLocationsRef.current?.(currentTruck);
             }
           }
         });
-        
+
         setWsService(service);
         console.log('WebSocket connected for real-time admin updates');
       } catch (error) {
@@ -114,8 +129,9 @@ const AdminDashboard: React.FC = () => {
     initWebSocket();
 
     return () => {
-      if (wsService) {
-        wsService.disconnect();
+      if (localService) {
+        localService.disconnect();
+        localService = null;
       }
     };
   }, []);
