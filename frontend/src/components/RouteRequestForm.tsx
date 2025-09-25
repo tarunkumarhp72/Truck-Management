@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RouteRequest } from '../types';
-import { LocationSuggestion } from '../services/geoapify';
+import { LocationSuggestion } from '../services/locationiq';
 import LocationSearchInput from './LocationSearchInput';
 
 interface RouteRequestFormProps {

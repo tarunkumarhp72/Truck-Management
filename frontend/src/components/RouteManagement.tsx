@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RouteRequest, RouteBid } from '../types';
 import { routeRequestAPI, routeBidAPI } from '../services/api';
 import RouteRequestForm from './RouteRequestForm';
+import Map from './Map';
 
 const RouteManagement: React.FC = () => {
   const [routeRequests, setRouteRequests] = useState<RouteRequest[]>([]);
@@ -141,7 +142,7 @@ const RouteManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Route Requests List */}
         <div className="bg-white rounded-lg shadow-lg">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -181,6 +182,40 @@ const RouteManagement: React.FC = () => {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+
+        {/* Route Map */}
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {selectedRoute ? 'Route Overview' : 'Select a route to view map'}
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="h-64 bg-gray-100 rounded-lg border overflow-hidden">
+              <Map
+                locations={[]}
+                showRoute={false}
+                routePoints={selectedRoute ? [{
+                  start: [parseFloat(selectedRoute.start_latitude), parseFloat(selectedRoute.start_longitude)],
+                  end: [parseFloat(selectedRoute.end_latitude), parseFloat(selectedRoute.end_longitude)]
+                }] : []}
+                className="h-full w-full"
+              />
+            </div>
+            {selectedRoute && (
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">Distance:</span>
+                  <div className="text-gray-900">{selectedRoute.distance_km || 'N/A'} km</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Material:</span>
+                  <div className="text-gray-900 capitalize">{selectedRoute.material_type}</div>
+                </div>
+              </div>
             )}
           </div>
         </div>

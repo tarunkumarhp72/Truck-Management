@@ -430,6 +430,7 @@ const AdminDashboard: React.FC = () => {
                 <Map
                   locations={selectedTruckLocations}
                   showRoute={true}
+                  showTruckIcons={true}
                   className="h-full w-full rounded-lg"
                 />
               </div>

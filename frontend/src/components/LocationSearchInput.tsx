@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { geoapifyService, LocationSuggestion } from '../services/geoapify';
+import { locationiqService, LocationSuggestion } from '../services/locationiq';
 
 interface LocationSearchInputProps {
   placeholder?: string;
@@ -51,7 +51,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     searchTimeoutRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const results = await geoapifyService.searchLocations(text, 8);
+        const results = await locationiqService.searchLocations(text, 8);
         setSuggestions(results);
         setShowSuggestions(true);
       } catch (err) {

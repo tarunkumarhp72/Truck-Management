@@ -16,6 +16,8 @@ interface MapProps {
   center?: [number, number];
   zoom?: number;
   showRoute?: boolean;
+  showTruckIcons?: boolean;
+  routePoints?: {start: [number, number], end: [number, number]}[];
   onLocationClick?: (location: Location) => void;
   className?: string;
 }
@@ -26,6 +28,8 @@ const Map: React.FC<MapProps> = ({
   center = [40.7128, -74.0060], // Default to NYC
   zoom = 10,
   showRoute = false,
+  showTruckIcons = false,
+  routePoints = [],
   onLocationClick,
   className = 'h-96',
 }) => {
@@ -76,12 +80,32 @@ const Map: React.FC<MapProps> = ({
 
       if (isNaN(lat) || isNaN(lng)) return;
 
-      const icon = L.divIcon({
-        html: `<div style="background-color: ${isLatest ? '#ef4444' : '#3b82f6'}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-        className: 'custom-div-icon',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
-      });
+      // Use truck icon for current locations or simple dots for historical data
+      let icon;
+      if (showTruckIcons && isLatest) {
+        // Truck icon for current driver location
+        icon = L.divIcon({
+          html: `
+            <div style="
+              font-size: 20px; 
+              color: #1e40af; 
+              text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            ">🚛</div>
+          `,
+          className: 'truck-icon',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+      } else {
+        // Simple dot for historical locations
+        icon = L.divIcon({
+          html: `<div style="background-color: ${isLatest ? '#ef4444' : '#3b82f6'}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+          className: 'custom-div-icon',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        });
+      }
 
       const marker = L.marker([lat, lng], { icon })
         .addTo(mapInstanceRef.current!)
@@ -99,6 +123,74 @@ const Map: React.FC<MapProps> = ({
       }
 
       markersRef.current.push(marker);
+    });
+
+    // Add route point markers (start and end locations)
+    routePoints.forEach((route, routeIndex) => {
+      // Start location marker (green pin)
+      const startIcon = L.divIcon({
+        html: `
+          <div style="
+            font-size: 24px; 
+            color: #10b981; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+          ">📍</div>
+        `,
+        className: 'start-pin-icon',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+      });
+
+      const startMarker = L.marker(route.start, { icon: startIcon })
+        .addTo(mapInstanceRef.current!)
+        .bindPopup(`
+          <div style="font-size: 12px;">
+            <strong>🚀 Pickup Location</strong><br/>
+            <strong>Route:</strong> ${routeIndex + 1}<br/>
+            <strong>Coordinates:</strong> ${route.start[0].toFixed(6)}, ${route.start[1].toFixed(6)}
+          </div>
+        `);
+      markersRef.current.push(startMarker);
+
+      // End location marker (red pin)
+      const endIcon = L.divIcon({
+        html: `
+          <div style="
+            font-size: 24px; 
+            color: #ef4444; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+          ">📍</div>
+        `,
+        className: 'end-pin-icon',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+      });
+
+      const endMarker = L.marker(route.end, { icon: endIcon })
+        .addTo(mapInstanceRef.current!)
+        .bindPopup(`
+          <div style="font-size: 12px;">
+            <strong>🏁 Delivery Location</strong><br/>
+            <strong>Route:</strong> ${routeIndex + 1}<br/>
+            <strong>Coordinates:</strong> ${route.end[0].toFixed(6)}, ${route.end[1].toFixed(6)}
+          </div>
+        `);
+      markersRef.current.push(endMarker);
+
+      // Draw route line between start and end
+      const routeLine = L.polyline([route.start, route.end], {
+        color: '#8b5cf6',
+        weight: 3,
+        opacity: 0.8,
+        dashArray: '10, 5',
+      }).addTo(mapInstanceRef.current!);
+      
+      // Store route line for cleanup (we'll modify the ref structure)
+      if (!routeLineRef.current) {
+        routeLineRef.current = routeLine;
+      }
     });
 
     // Draw route line if requested

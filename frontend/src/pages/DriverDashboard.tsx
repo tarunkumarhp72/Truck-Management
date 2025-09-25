@@ -379,59 +379,83 @@ const DriverDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tracking Controls */}
-                <div className="mt-8 space-y-4">
-                  {!isTracking ? (
-                    <button
-                      onClick={startTracking}
-                      disabled={false}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:hover:scale-100 flex items-center justify-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                      </svg>
-                      <span>START LOCATION TRACKING</span>
-                    </button>
-                  ) : (
-                    <div className="space-y-3">
+                {/* Tracking Controls - Only show when there's an active route */}
+                {currentRoute && (
+                  <div className="mt-8 space-y-4">
+                    {!isTracking ? (
                       <button
-                        disabled={true}
-                        className="w-full bg-gray-400 cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center space-x-2 opacity-60"
+                        onClick={startTracking}
+                        disabled={false}
+                        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:hover:scale-100 flex items-center justify-center space-x-2"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                         </svg>
-                        <span>TRACKING ACTIVE</span>
+                        <span>START LOCATION TRACKING</span>
                       </button>
-                      <button
-                        onClick={stopTracking}
-                        className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd"/>
-                        </svg>
-                        <span>STOP TRACKING</span>
-                      </button>
-                    </div>
-                  )}
-                  
-                  {/* Connection Status Info */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-blue-900">Connection Status</span>
-                      <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                        locationService ? 'bg-blue-500 text-white' : 'bg-yellow-500 text-white'
-                      }`}>
-                        {locationService ? 'REAL-TIME' : 'STANDARD'}
-                      </span>
-                    </div>
-                    <div className="text-xs text-blue-700">
-                      {locationService 
-                        ? 'Live position updates via WebSocket connection' 
-                        : 'Position updates every 5 seconds via HTTP API'
-                      }
+                    ) : (
+                      <div className="space-y-3">
+                        <button
+                          disabled={true}
+                          className="w-full bg-gray-400 cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center space-x-2 opacity-60"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                          </svg>
+                          <span>TRACKING ACTIVE</span>
+                        </button>
+                        <button
+                          onClick={stopTracking}
+                          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd"/>
+                          </svg>
+                          <span>STOP TRACKING</span>
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Connection Status Info */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-blue-900">Connection Status</span>
+                        <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                          locationService ? 'bg-blue-500 text-white' : 'bg-yellow-500 text-white'
+                        }`}>
+                          {locationService ? 'REAL-TIME' : 'STANDARD'}
+                        </span>
+                      </div>
+                      <div className="text-xs text-blue-700">
+                        {locationService 
+                          ? 'Live position updates via WebSocket connection' 
+                          : 'Position updates every 5 seconds via HTTP API'
+                        }
+                      </div>
                     </div>
                   </div>
+                )}
+
+                {/* Message when no active route */}
+                {!currentRoute && (
+                  <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-yellow-800">
+                          No Active Route
+                        </h3>
+                        <div className="mt-2 text-sm text-yellow-700">
+                          <p>Location tracking is only available when you have an accepted bid. Check the "Available Routes" tab to place bids on delivery routes.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 </div>
               </div>
             </div>
@@ -532,6 +556,11 @@ const DriverDashboard: React.FC = () => {
                   <Map
                     locations={locations}
                     showRoute={true}
+                    showTruckIcons={true}
+                    routePoints={currentRoute ? [{
+                      start: [parseFloat(currentRoute.start_latitude), parseFloat(currentRoute.start_longitude)],
+                      end: [parseFloat(currentRoute.end_latitude), parseFloat(currentRoute.end_longitude)]
+                    }] : []}
                     className="h-full w-full"
                   />
                 </div>
