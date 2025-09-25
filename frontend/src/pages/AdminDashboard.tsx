@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Map from '../components/Map';
-import { Truck, Location, DeliveryRoute, User, DashboardData } from '../types';
-import { truckAPI, locationAPI, routeAPI, authAPI, dashboardAPI } from '../services/api';
+import { Truck, Location,  User, DashboardData } from '../types';
+import { truckAPI, locationAPI,  authAPI, dashboardAPI } from '../services/api';
 import { AdminDashboardService } from '../services/websocket';
 
 const AdminDashboard: React.FC = () => {

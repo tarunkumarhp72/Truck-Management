@@ -137,16 +137,16 @@ const DriverDashboard: React.FC = () => {
   }, [locationService]);
 
   // Start route
-  const startRoute = async (routeId: number) => {
-    try {
-      const response = await routeAPI.startRoute(routeId);
-      setCurrentRoute(response.data);
-      await startTracking();
-    } catch (error) {
-      console.error('Failed to start route:', error);
-      setError('Failed to start route');
-    }
-  };
+  // const startRoute = async (routeId: number) => {
+  //   try {
+  //     const response = await routeAPI.startRoute(routeId);
+  //     setCurrentRoute(response.data);
+  //     await startTracking();
+  //   } catch (error) {
+  //     console.error('Failed to start route:', error);
+  //     setError('Failed to start route');
+  //   }
+  // };
 
   // Complete route
   const completeRoute = async (routeId: number) => {

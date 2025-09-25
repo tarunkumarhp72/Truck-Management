@@ -52,7 +52,8 @@ const Map: React.FC<MapProps> = ({
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [center, zoom]);
+
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;

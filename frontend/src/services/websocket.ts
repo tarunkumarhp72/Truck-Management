@@ -1,5 +1,3 @@
-import { Location } from '../types';
-
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
