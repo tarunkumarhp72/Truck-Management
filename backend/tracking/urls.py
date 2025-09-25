@@ -20,4 +20,19 @@ urlpatterns = [
     
     # Dashboard
     path('dashboard/', views.dashboard_data, name='dashboard_data'),
+    
+    # Route requests (bidding system)
+    path('route-requests/', views.RouteRequestListCreateView.as_view(), name='route_request_list_create'),
+    path('route-requests/<int:pk>/', views.RouteRequestDetailView.as_view(), name='route_request_detail'),
+    path('route-requests/<int:route_request_id>/bids/', views.route_bids, name='route_bids'),
+    
+    # Route bids
+    path('bids/', views.RouteBidListCreateView.as_view(), name='bid_list_create'),
+    path('bids/<int:pk>/', views.RouteBidDetailView.as_view(), name='bid_detail'),
+    path('bids/<int:bid_id>/accept/', views.accept_bid, name='accept_bid'),
+    path('bids/<int:bid_id>/reject/', views.reject_bid, name='reject_bid'),
+    path('bids/<int:bid_id>/withdraw/', views.withdraw_bid, name='withdraw_bid'),
+    
+    # Driver specific routes
+    path('available-routes/', views.available_routes, name='available_routes'),
 ]

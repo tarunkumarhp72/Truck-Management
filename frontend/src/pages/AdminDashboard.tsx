@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Map from '../components/Map';
+import RouteManagement from '../components/RouteManagement';
 import { Truck, Location,  User, DashboardData } from '../types';
 import { truckAPI, locationAPI,  authAPI, dashboardAPI } from '../services/api';
 import { AdminDashboardService } from '../services/websocket';
@@ -14,11 +15,14 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [wsService, setWsService] = useState<AdminDashboardService | null>(null);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'routes'>('dashboard');
   const [showCreateTruckModal, setShowCreateTruckModal] = useState(false);
   const [newTruck, setNewTruck] = useState({
     truck_number: '',
     license_plate: '',
     model: '',
+    truck_type: 'small',
+    capacity_tons: '1.0',
     driver: '',
   });
 
@@ -74,11 +78,20 @@ const AdminDashboard: React.FC = () => {
         truck_number: newTruck.truck_number,
         license_plate: newTruck.license_plate,
         model: newTruck.model,
+        truck_type: newTruck.truck_type as any,
+        capacity_tons: parseFloat(newTruck.capacity_tons),
         driver: newTruck.driver ? parseInt(newTruck.driver) : undefined,
       });
       
       setShowCreateTruckModal(false);
-      setNewTruck({ truck_number: '', license_plate: '', model: '', driver: '' });
+      setNewTruck({ 
+        truck_number: '', 
+        license_plate: '', 
+        model: '', 
+        truck_type: 'small', 
+        capacity_tons: '1.0', 
+        driver: '' 
+      });
       await loadDashboardData();
     } catch (error) {
       console.error('Failed to create truck:', error);
@@ -180,15 +193,17 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowCreateTruckModal(true)}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-200 shadow-lg flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd"/>
-                </svg>
-                <span>Add Vehicle</span>
-              </button>
+              {activeTab === 'dashboard' && (
+                <button
+                  onClick={() => setShowCreateTruckModal(true)}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-200 shadow-lg flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd"/>
+                  </svg>
+                  <span>Add Vehicle</span>
+                </button>
+              )}
               <button
                 onClick={logout}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-200 shadow-lg"
@@ -200,12 +215,47 @@ const AdminDashboard: React.FC = () => {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'dashboard'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Fleet Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab('routes')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'routes'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Route Management
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {error && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
           </div>
         )}
+
+        {/* Tab Content */}
+        {activeTab === 'routes' ? (
+          <RouteManagement />
+        ) : (
+          <>
+            {/* Dashboard Content */}
 
         {/* Stats Cards */}
         {dashboardData && (
@@ -435,6 +485,8 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         )}
+          </>
+        )}
       </main>
 
       {/* Create Truck Modal */}
@@ -477,6 +529,36 @@ const AdminDashboard: React.FC = () => {
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
                   value={newTruck.model}
                   onChange={(e) => setNewTruck(prev => ({ ...prev, model: e.target.value }))}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Truck Type
+                </label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                  value={newTruck.truck_type}
+                  onChange={(e) => setNewTruck(prev => ({ ...prev, truck_type: e.target.value }))}
+                >
+                  <option value="mini">Mini Truck</option>
+                  <option value="small">Small Truck</option>
+                  <option value="medium">Medium Truck</option>
+                  <option value="large">Large Truck</option>
+                  <option value="heavy">Heavy Truck</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Capacity (tons)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  required
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                  value={newTruck.capacity_tons}
+                  onChange={(e) => setNewTruck(prev => ({ ...prev, capacity_tons: e.target.value }))}
                 />
               </div>
               <div className="mb-6">

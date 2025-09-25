@@ -4,6 +4,8 @@ import {
   Truck, 
   Location, 
   DeliveryRoute, 
+  RouteRequest,
+  RouteBid,
   LoginCredentials, 
   RegisterData, 
   AuthResponse,
@@ -162,6 +164,61 @@ export const routeAPI = {
 export const dashboardAPI = {
   getDashboardData: (): Promise<AxiosResponse<DashboardData>> =>
     api.get('/tracking/dashboard/'),
+};
+
+// Route Request API (Bidding System)
+export const routeRequestAPI = {
+  getRouteRequests: (): Promise<AxiosResponse<RouteRequest[]>> =>
+    api.get('/tracking/route-requests/'),
+  
+  getRouteRequest: (id: number): Promise<AxiosResponse<RouteRequest>> =>
+    api.get(`/tracking/route-requests/${id}/`),
+  
+  createRouteRequest: (data: Partial<RouteRequest>): Promise<AxiosResponse<RouteRequest>> =>
+    api.post('/tracking/route-requests/', data),
+  
+  updateRouteRequest: (id: number, data: Partial<RouteRequest>): Promise<AxiosResponse<RouteRequest>> =>
+    api.put(`/tracking/route-requests/${id}/`, data),
+  
+  deleteRouteRequest: (id: number): Promise<AxiosResponse<void>> =>
+    api.delete(`/tracking/route-requests/${id}/`),
+  
+  getAvailableRoutes: (): Promise<AxiosResponse<RouteRequest[]>> =>
+    api.get('/tracking/available-routes/'),
+    
+  getRouteBids: (routeRequestId: number): Promise<AxiosResponse<RouteBid[]>> =>
+    api.get(`/tracking/route-requests/${routeRequestId}/bids/`),
+};
+
+// Route Bid API
+export const routeBidAPI = {
+  getBids: (routeRequestId?: number): Promise<AxiosResponse<RouteBid[]>> =>
+    api.get('/tracking/bids/', { params: routeRequestId ? { route_request_id: routeRequestId } : {} }),
+  
+  getBid: (id: number): Promise<AxiosResponse<RouteBid>> =>
+    api.get(`/tracking/bids/${id}/`),
+  
+  createBid: (data: Partial<RouteBid>): Promise<AxiosResponse<RouteBid>> =>
+    api.post('/tracking/bids/', data),
+  
+  updateBid: (id: number, data: Partial<RouteBid>): Promise<AxiosResponse<RouteBid>> =>
+    api.put(`/tracking/bids/${id}/`, data),
+  
+  deleteBid: (id: number): Promise<AxiosResponse<void>> =>
+    api.delete(`/tracking/bids/${id}/`),
+  
+  acceptBid: (bidId: number): Promise<AxiosResponse<{
+    bid: RouteBid;
+    route_request: RouteRequest;
+    delivery_route: DeliveryRoute;
+  }>> =>
+    api.post(`/tracking/bids/${bidId}/accept/`),
+  
+  rejectBid: (bidId: number): Promise<AxiosResponse<RouteBid>> =>
+    api.post(`/tracking/bids/${bidId}/reject/`),
+  
+  withdrawBid: (bidId: number): Promise<AxiosResponse<RouteBid>> =>
+    api.post(`/tracking/bids/${bidId}/withdraw/`),
 };
 
 export default api;

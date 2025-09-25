@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Map from '../components/Map';
+import AvailableRoutes from '../components/AvailableRoutes';
 import { Truck, Location, DeliveryRoute } from '../types';
 import { truckAPI, locationAPI, routeAPI } from '../services/api';
 import { LocationTrackingService } from '../services/websocket';
@@ -14,6 +15,7 @@ const DriverDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [locationService, setLocationService] = useState<LocationTrackingService | null>(null);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'routes'>('dashboard');
 
   // Get user's current position
   const getCurrentPosition = useCallback((): Promise<GeolocationPosition> => {
@@ -293,6 +295,34 @@ const DriverDashboard: React.FC = () => {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'dashboard'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Live Tracking
+            </button>
+            <button
+              onClick={() => setActiveTab('routes')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'routes'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Available Routes
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {error && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -300,7 +330,13 @@ const DriverDashboard: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tab Content */}
+        {activeTab === 'routes' ? (
+          <AvailableRoutes />
+        ) : (
+          <>
+            {/* Dashboard Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Truck Info */}
           <div className="lg:col-span-1">
             <div className="bg-white overflow-hidden shadow-xl rounded-xl border border-gray-200">
@@ -348,7 +384,8 @@ const DriverDashboard: React.FC = () => {
                   {!isTracking ? (
                     <button
                       onClick={startTracking}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+                      disabled={false}
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:hover:scale-100 flex items-center justify-center space-x-2"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
@@ -356,15 +393,26 @@ const DriverDashboard: React.FC = () => {
                       <span>START LOCATION TRACKING</span>
                     </button>
                   ) : (
-                    <button
-                      onClick={stopTracking}
-                      className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd"/>
-                      </svg>
-                      <span>STOP LOCATION TRACKING</span>
-                    </button>
+                    <div className="space-y-3">
+                      <button
+                        disabled={true}
+                        className="w-full bg-gray-400 cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center space-x-2 opacity-60"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                        </svg>
+                        <span>TRACKING ACTIVE</span>
+                      </button>
+                      <button
+                        onClick={stopTracking}
+                        className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd"/>
+                        </svg>
+                        <span>STOP TRACKING</span>
+                      </button>
+                    </div>
                   )}
                   
                   {/* Connection Status Info */}
@@ -534,6 +582,8 @@ const DriverDashboard: React.FC = () => {
             )}
           </div>
         </div>
+          </>
+        )}
       </main>
     </div>
   );
